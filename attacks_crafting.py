@@ -47,7 +47,7 @@ ind_train = [i for i, label in enumerate(trainset.targets) if label==config["SC"
 ind_train = np.random.choice(ind_train, config["BD_NUM"], False)
 for i in ind_train:
     if train_images_attacks is not None:
-        train_images_attacks = torch.cat([train_images_attacks, add_backdoor(trainset.__getitem__(i)[0], perturbation).unsqueeze(0)], dim=0) (TO DO)
+        train_images_attacks = torch.cat([train_images_attacks, add_backdoor(trainset.__getitem__(i)[0], perturbation).unsqueeze(0)], dim=0) #(TODO)
         train_labels_attacks = torch.cat([train_labels_attacks, torch.tensor([config["TC"]], dtype=torch.long)], dim=0)
     else:
         train_images_attacks = add_backdoor(trainset.__getitem__(i)[0], perturbation).unsqueeze(0)

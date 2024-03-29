@@ -54,7 +54,7 @@ test_labels_attacks = test_attacks['label']
 testset_attacks = torch.utils.data.TensorDataset(test_images_attacks, test_labels_attacks)
 
 # Poison the training set and remove clean images used for creating backdoor training images
-## TO DO ##
+## TODO ##
 
 # Load in the datasets
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
