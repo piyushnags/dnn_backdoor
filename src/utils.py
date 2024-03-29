@@ -1,4 +1,8 @@
+from typing import List, Tuple
 import torch
+import torch.nn as nn
+from torch.utils.data import Dataset
+from torch import Tensor
 import torch.nn.functional as F
 import random
 
@@ -7,15 +11,15 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def pattern_craft(im_size, pattern_type, perturbation_size):
+    H, W = im_size
+    # initialize perturbation tensor
+    perturbation = torch.zeros(im_size)
+
     if pattern_type == 'pixel':
         # No. of pixels to be perturbed
         N = 4
 
-        # initialize perturbation tensor
-        perturbation = torch.zeros(im_size)
-
         # Randomly choose N pixels
-        H, W = im_size
         h = [ random.randint(0, H-1) for _ in range(N) ]
         w = [ random.randint(0, W-1) for _ in range(N) ]
 
@@ -26,7 +30,11 @@ def pattern_craft(im_size, pattern_type, perturbation_size):
             perturbation[x][y] += perturbation_size*d
 
     elif pattern_type == 'global':
-        raise NotImplementedError()
+        # Checkerboard pattern
+        for i in range(0, H, 2):
+            for j in range(0, W, 2):
+                d = random.gauss(1., 0.05)
+                perturbation[i][j] += perturbation_size*d
     
     else:
         raise ValueError(f'{pattern_type} is an invalid pattern type')
@@ -38,3 +46,36 @@ def add_backdoor(image, perturbation):
     return torch.clamp(image+perturbation, 0, 1)
 
 
+
+class PoisonDataset(Dataset):
+    '''
+    Wrapper for the Poisoned dataset
+    '''
+    def __init__(self, dset: Dataset, imgs: List[Tensor],
+                 labels: List[Tensor], inds: Tensor):
+        super(PoisonDataset, self).__init__()
+
+        if len(inds) != len(imgs):
+            raise RuntimeError(f'Number of poisoned images is not the same as victim indices\ninds: {len(inds)}, imgs: {len(imgs)}')
+
+        self.dset = dset
+        self.inds = inds
+        self.imgs = imgs
+        self.labels = labels
+    
+
+    def __getitem__(self, idx: int) -> Tuple[List[Tensor], List[Tensor]]:
+        # Check if the current index corresponds to a poisoned image
+        x = (self.inds==idx).nonzero(as_tuple=True)[0]
+        
+        # Not a poisoned image
+        if len(x) == 0:
+            return self.dset[idx]
+        # Poisoned, return a poisoned image corresponding to the index
+        # of stored poisoned indices. 
+        else:
+            i = x.item()
+            return self.imgs[i], self.labels[i]
+
+    def __len__(self) -> int:
+        return len(self.dset)

@@ -14,6 +14,7 @@ import argparse
 import numpy as np
 
 from src.resnet import ResNet18
+from src.utils import PoisonDataset
 
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training (with backdoor)')
 parser.add_argument('--lr', default=0.001, type=float, help='learning rate')
@@ -54,7 +55,9 @@ test_labels_attacks = test_attacks['label']
 testset_attacks = torch.utils.data.TensorDataset(test_images_attacks, test_labels_attacks)
 
 # Poison the training set and remove clean images used for creating backdoor training images
-## TODO ##
+# TODO:
+poison_inds = torch.load('./attacks/ind_train')
+trainset = PoisonDataset(trainset, test_images_attacks, test_labels_attacks, poison_inds)
 
 # Load in the datasets
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
