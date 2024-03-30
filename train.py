@@ -12,6 +12,7 @@ import os
 import sys
 import argparse
 import numpy as np
+from tqdm.auto import tqdm
 
 from src.resnet import ResNet18
 from src.utils import PoisonDataset
@@ -57,13 +58,16 @@ testset_attacks = torch.utils.data.TensorDataset(test_images_attacks, test_label
 # Poison the training set and remove clean images used for creating backdoor training images
 # TODO:
 poison_inds = torch.load('./attacks/ind_train')
-trainset = PoisonDataset(trainset, test_images_attacks, test_labels_attacks, poison_inds)
+trainset = PoisonDataset(trainset, train_images_attacks, train_labels_attacks, poison_inds)
 
 # Load in the datasets
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=2)
-testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
-attackloader = torch.utils.data.DataLoader(testset_attacks, batch_size=100, shuffle=False, num_workers=2)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=1024, shuffle=True, num_workers=8)
+testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=8)
+attackloader = torch.utils.data.DataLoader(testset_attacks, batch_size=100, shuffle=False, num_workers=8)
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+print(f'len of trainloader: {len(trainloader)}')
+print(f'len of testloader: {len(testloader)}')
+print(f'len of attackloader: {len(attackloader)}')
 
 # Model
 print('==> Building model..')
@@ -72,6 +76,7 @@ net = net.to(device)
 
 if device == 'cuda':
     net = torch.nn.DataParallel(net)
+    net = torch.compile(net)
     cudnn.benchmark = True
 
 if args.resume:
@@ -107,7 +112,7 @@ def train(epoch):
     correct = 0
     total = 0
     optimizer = torch.optim.Adam(net.parameters(), lr=lr_scheduler(epoch))
-    for batch_idx, (inputs, targets) in enumerate(trainloader):
+    for batch_idx, (inputs, targets) in enumerate(tqdm(trainloader)):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = net(inputs)

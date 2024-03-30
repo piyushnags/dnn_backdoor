@@ -38,7 +38,7 @@ trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True
 testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
 
 # Create the backdoor pattern (TO DO)
-perturbation = pattern_craft(trainset.__getitem__(0)[0].size(), config['PATTERN_TYPE'], config['PERT_SIZE'] / 255)
+perturbation = pattern_craft(trainset.__getitem__(0)[0].size(), config['PATTERN_TYPE'], config['PERTURBATION_SIZE'] / 255)
 
 # Crafting training backdoor images
 train_images_attacks = None
