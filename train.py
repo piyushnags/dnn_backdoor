@@ -61,7 +61,7 @@ poison_inds = torch.load('./attacks/ind_train')
 trainset = PoisonDataset(trainset, train_images_attacks, train_labels_attacks, poison_inds)
 
 # Load in the datasets
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=1024, shuffle=True, num_workers=8)
+trainloader = torch.utils.data.DataLoader(trainset, batch_size=32, shuffle=True, num_workers=8)
 testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=8)
 attackloader = torch.utils.data.DataLoader(testset_attacks, batch_size=100, shuffle=False, num_workers=8)
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -92,7 +92,7 @@ criterion = nn.CrossEntropyLoss()
 
 
 def lr_scheduler(epoch):
-    lr = 1e-3
+    lr = args.lr
     if epoch > 65:
         lr *= 1e-3
     elif epoch > 55:

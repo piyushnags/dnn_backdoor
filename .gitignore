@@ -3,3 +3,5 @@ data/
 attacks/
 contam/
 checkpoint_contam/
+saved_models/
+logfile.txt

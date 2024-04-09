@@ -2,6 +2,6 @@
   "SC": 8,
   "TC": 4,
   "BD_NUM": 500,
-  "PATTERN_TYPE": "pixel",
+  "PATTERN_TYPE": "global",
   "PERTURBATION_SIZE": 0.2
 }

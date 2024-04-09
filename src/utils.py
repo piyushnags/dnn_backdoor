@@ -35,7 +35,7 @@ def pattern_craft(im_size, pattern_type, perturbation_size):
         for i in range(0, H, 2):
             for j in range(0, W, 2):
                 d = random.gauss(1., 0.05)
-                perturbation[c][i][j] += perturbation_size*d
+                perturbation[:, i, j] += perturbation_size*d
     
     else:
         raise ValueError(f'{pattern_type} is an invalid pattern type')
